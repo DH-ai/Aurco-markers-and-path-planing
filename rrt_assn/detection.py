@@ -34,8 +34,7 @@ box = list((np.arange(1,2,1/9),np.arange(2,1.5,1/9))) + list((np.arange(2,3,1/9)
 frame = cv2.imread("/home/dhruv/Desktop/MRT/rrt/src/rrt_assn/rrt_assn/arucoMarker.jpg") #(1080,1920,3)
 
 sampling_image = np.full((len(frame),len(frame[0])),255.0,dtype=np.uint8)
-# print(sampling_image.shape)
-sampling_image = cv2.cvtColor(sampling_image,cv2.COLOR_GRAY2BGR)
+
 gray_img = cv2.cvtColor(frame,cv2.COLOR_BGR2GRAY)
 
 
