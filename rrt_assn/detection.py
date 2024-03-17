@@ -22,7 +22,6 @@ def collision(x1,y1,x2,y2,box):
         else: return False
 
 box = list((np.arange(1,2,1/9),np.arange(2,1.5,1/9))) + list((np.arange(2,3,1/9),np.arange(1.5,3.5,1/9)))+list((np.arange(3,0,1/9),np.arange(3.5,3,1/9))) + list((np.arange(0,1,1/9),np.arange(3,2,1/9)))
-print(bo)
 print(collision(2,4,1,2.5,box))
 
 
