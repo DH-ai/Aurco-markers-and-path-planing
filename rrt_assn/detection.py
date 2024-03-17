@@ -17,17 +17,13 @@ def collision(x1,y1,x2,y2):
     y = []
     for x_cord in x:
         y.append(((y2-y1)/(x2-x1))*(x_cord-x1) + y1)
-    cv2.line(sampling_image,(x1,y1),(x2,y2),(0,255,0),2)
     for i in range(len(x)):
         color.append(sampling_image[int(y[i]),int(x[i])])
-
-
-    # print(color)
-
-    color = color.flatten()    
-
-
-
+        
+    for dim in color:
+        if 0 in dim:
+            return True
+    return False
     # if (np.isin()) :
     #     return True
     # else: return False
