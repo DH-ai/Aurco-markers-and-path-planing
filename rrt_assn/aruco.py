@@ -17,11 +17,12 @@ while (True):
     arucoDict = cv2.aruco.getPredefinedDictionary(aruco.DICT_4X4_100)
     arucoParams = cv2.aruco.DetectorParameters()
     detectors = cv2.aruco.ArucoDetector(arucoDict,arucoParams)
+    
     corners, ids, rejectedCandidates = detectors.detectMarkers(gray_image)
     
     frame_markers = aruco.drawDetectedMarkers(frame.copy(), corners, ids)
     
-    cv2.line(frame_markers,(0,0),(100,100),(0,0,0),5)
+    # cv2.line(frame_markers,(0,0),(100,100),(0,0,0),5)
     # resized = cv2.resize(frame_markers,(900,600))
     
 
