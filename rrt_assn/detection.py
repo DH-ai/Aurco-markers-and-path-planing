@@ -106,12 +106,30 @@ if len(corners)>0:
         cv2.line(sampling_image,bottomRight,bottomLeft,0,2)
         cv2.line(sampling_image,bottomLeft,topLeft,0,2)
 
+i =1
+pathFound =False
+while pathFound==False:
+    # initialization of some random node 
+    nx,ny = rnd_pnt()
+    print("Random Points:",nx,ny) 
+    
+    # getting the nearest node to that
+    nearest_ind = nearest_node(nx,ny)
+    nearest_x = node_list[nearest_ind].x
+    nearest_y = node_list[nearest_ind].y
+    print("Nearest node coordinates:",nearest_x,nearest_y)
 
-print(collision(348,408,352,463))
-# cv2.imshow("Sampling Image",sampling_image)
+    # checking the connection 
+    tx,ty,directCon,nodeCon = checkCollisons(nx,ny,nearest_x,nearest_y)
+
+    if directCon and nodeCon:
+        node_list.append(i)
 
 
-cv2.imshow("Orignal Image",frame)
 
-cv2.waitKey(0)
+
+
+
+
+
 cv2.destroyAllWindows()
