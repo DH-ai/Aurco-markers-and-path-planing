@@ -4,6 +4,7 @@ import cv2
 from cv2 import aruco
 import numpy as np
 import math
+import random
 
 class Node():
     def __init__(self,x,y):
@@ -20,15 +21,18 @@ def collision(x1,y1,x2,y2):
         y.append(((y2-y1)/(x2-x1))*(x_cord-x1) + y1)
     for i in range(len(x)):
         color.append(sampling_image[int(y[i]),int(x[i])]) 
+        cv2.circle(sampling_image,(int(x[i]),int(y[i])),3,0,lineType=8,thickness=3)
+
+  
     return True if 0 in color else False
     # if (np.isin()) :
     #     return True
  
 
 def checkCollisons(x1,y1,x2,y2):
-    _,theta = dist_and_angle(x1,y1.x2,y2)
+    _,theta = dist_and_angle(x1,y1,x2,y2)
     x = x2+ stepSize*np.cos(theta)
-    y = y2+ stepSize*np.size(theta)
+    y = y2+ stepSize*np.sin(theta)
     
     # checking the direct connection between the Q_new and the final end
     if collision(x,y,end[1],end[0]):
@@ -54,9 +58,11 @@ def nearest_node(x,y):
 
 
 def rnd_pnt():
-    new_y = math.random.randint(0,len(frame))
-    new_x = math,random.randint(0,len(frame[0]))
+    new_y = random.randint(0,len(frame))
+    new_x = random.randint(0, len(frame[0]))
     return (new_y,new_x)
+
+
 def dist_and_angle(x1,y1,x2,y2):
     dist = math.sqrt( ((x1-x2)**2)+((y1-y2)**2) )
     angle = math.atan2(y2-y1,x2-x1)
@@ -66,12 +72,12 @@ def dist_and_angle(x1,y1,x2,y2):
 frame = cv2.imread("/home/dhruv/Desktop/MRT/rrt/src/rrt_assn/rrt_assn/arucoMarker.jpg") #(1080,1920,3)
 start = (0,0)
 end= (len(frame)-1,len(frame[0])-1)
-stepSize = 20
+stepSize = 60
 
 cv2.circle(frame,(start[1]+10,start[0]+10),10,(0,255,0),4)
 cv2.circle(frame,(end[1]-10,end[0]-10),10,(0,0,255),4)
 
-node_list = [0]
+node_list = [None]
 node_list[0]= Node(start[0],start[1])
 node_list[0].path_x.append(start[0])
 node_list[0].path_y.append(start[1])
@@ -99,12 +105,19 @@ if len(corners)>0:
         cv2.line(frame,topRight,bottomRight,(0,0,255),2)
         cv2.line(frame,bottomRight,bottomLeft,(0,0,255),2)
         cv2.line(frame,bottomLeft,topLeft,(0,0,255),2)
-
+        points= np.array(
+            [
+            [int(tl[0]),int(tl[1])],
+            [int(tr[0]),int(tr[1])],
+            [int(br[0]),int(br[1])],
+            [int(bl[0]),int(bl[1])]]
+            )
         # for sampled image 
         cv2.line(sampling_image,topLeft,topRight,0,2)
         cv2.line(sampling_image,topRight,bottomRight,0,2)
         cv2.line(sampling_image,bottomRight,bottomLeft,0,2)
         cv2.line(sampling_image,bottomLeft,topLeft,0,2)
+        cv2.fillPoly(sampling_image, [points], color=(0, 0, 0))
 
 i =1
 pathFound =False
@@ -112,24 +125,73 @@ while pathFound==False:
     # initialization of some random node 
     nx,ny = rnd_pnt()
     print("Random Points:",nx,ny) 
-    
+    cv2.circle(sampling_image,(nx,ny),3,0,lineType=8,thickness=3)
+
+    cv2.imshow("test",sampling_image)
+    cv2.waitKey(0)
+ 
     # getting the nearest node to that
     nearest_ind = nearest_node(nx,ny)
     nearest_x = node_list[nearest_ind].x
     nearest_y = node_list[nearest_ind].y
-    print("Nearest node coordinates:",nearest_x,nearest_y)
+    print("Nearest node coordinates:",nearest_x,nearest_y,"Index:",nearest_ind)
 
     # checking the connection 
     tx,ty,directCon,nodeCon = checkCollisons(nx,ny,nearest_x,nearest_y)
-
+    print(directCon,nodeCon)
     if directCon and nodeCon:
+        
         node_list.append(i)
+        node_list[i] = Node(tx,ty)
+        node_list[i].path_x = node_list[nearest_ind].path_x.copy()
+        node_list[i].path_y = node_list[nearest_ind].path_y.copy()
+        node_list[i].path_x.append(tx)
+        node_list[i].path_y.append(ty)
+
+        # drawring the tree 
+        cv2.circle(sampling_image,(int(tx),int(ty)),3,(255,0,0),lineType=8,thickness=3)
+        cv2.line(sampling_image, (int(tx),int(ty)), (int(node_list[nearest_ind].x),int(node_list[nearest_ind].y)), (0,255,0), thickness=1, lineType=8)
+       
+        cv2.line(sampling_image,(int(tx),int(ty)),(end[1],end[0]),(0,0,255),thickness=2) 
+
+        for j in range(len(node_list[i].path_x)-1):
+            cv2.line(sampling_image, (int(node_list[i].path_x[j]),int(node_list[i].path_y[j])), (int(node_list[i].path_x[j+1]),int(node_list[i].path_y[j+1])), (255,0,0), thickness=2, lineType=8)
+        cv2.imshow("LOL",sampling_image)
+        break
+
+    elif nodeCon:
+        print("Nodes connected")
+        node_list.append(i)
+        node_list[i] = Node(tx,ty)
+        node_list[i].path_x = node_list[nearest_ind].path_x.copy()
+        node_list[i].path_y = node_list[nearest_ind].path_y.copy()
+        # print(i)cv2.waitKey(1)
+        # print(node_list[nearest_ind].path_y)
+        node_list[i].path_x.append(tx)
+        node_list[i].path_y.append(ty)
+        i=i+1
+        # display
+        cv2.circle(sampling_image, (int(tx),int(ty)), 2,(0,0,255),thickness=3, lineType=8)
+        cv2.line(sampling_image, (int(tx),int(ty)), (int(node_list[nearest_ind].x),int(node_list[nearest_ind].y)), (0,255,0), thickness=1, lineType=8)
+        
+        
+        
+        continue
+
+    else:
+        print("No direct con. and no node con. :( Generating new rnd numbers")
+     
+        continue
 
 
 
+cv2.imshow("sdc",sampling_image)
+cv2.waitKey(0)
 
 
 
+cv2.imwrite("sampling.jpg",sampling_image)
+cv2.imwrite("frame.jpg",frame)
 
 
 cv2.destroyAllWindows()
