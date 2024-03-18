@@ -22,7 +22,7 @@ def collision(x1,y1,x2,y2):
     for i in range(len(x)):
         color.append(sampling_image[int(y[i]),int(x[i])]) 
         cv2.circle(sampling_image,(int(x[i]),int(y[i])),3,0,lineType=8,thickness=3)
-
+        print(int(x[i]),int(y[i]))
   
     return True if 0 in color else False
     # if (np.isin()) :
@@ -33,7 +33,7 @@ def checkCollisons(x1,y1,x2,y2):
     _,theta = dist_and_angle(x1,y1,x2,y2)
     x = x2+ stepSize*np.cos(theta)
     y = y2+ stepSize*np.sin(theta)
-    
+
     # checking the direct connection between the Q_new and the final end
     if collision(x,y,end[1],end[0]):
         direcCon = False
