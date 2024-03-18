@@ -17,14 +17,21 @@ def collision(x1,y1,x2,y2):
     color=[]
     x = list(np.arange(x1,x2,(x2-x1)/100))
     y = []
+    print(f"Collison between ({x1},{y1}) and {({x2},{y2})}")
     for x_cord in x:
         y.append(((y2-y1)/(x2-x1))*(x_cord-x1) + y1)
     for i in range(len(x)):
         color.append(sampling_image[int(y[i]),int(x[i])]) 
-        cv2.circle(sampling_image,(int(x[i]),int(y[i])),1,(2*i),thickness=3)
-    if 0 in color:
-        return True
-    else: return False
+        # cv2.circle(sampling_image,(int(x[i]),int(y[i])),1,(2*i),thickness=3) ## such a pain in the ass
+    
+    for i in range(len(color)-5):
+       
+        
+        if color[i]==0:
+            print("Collision returning with value of color ad ",color[i])
+            return True
+        
+    return False
     # if (np.isin()) :
     #     return True
  
@@ -37,15 +44,18 @@ def checkCollisons(x1,y1,x2,y2):
     print(x,y)
     # checking the direct connection between the Q_new and the final end
     if collision(x,y,end[1],end[0]):
+        print("Cheking direct connection to the end .........")
         direcCon = False
     else:
         direcCon = True
-    
+    print(f"Direct Connection between {x,y} and end is {direcCon}")
+    print("Checking the connection between our new node and the nearest node ")
     #checks the connection between the two nodes
     if collision(x,y,x2,y2):
         nodeCon = False
     else:
         nodeCon = True
+    print(f"Direct Connection between {x,y} {x2,y2}is {direcCon}")
 
     return(x,y,direcCon,nodeCon) # return the coordinates for new node and direcCon-> if that new node directly connectes to the goal end or not and nodeCon-> if the rqandom genrated node has free path or not
     
@@ -73,7 +83,7 @@ def dist_and_angle(x1,y1,x2,y2):
 frame = cv2.imread("rrt_assn/arucoMarker.jpg") #(1080,1920,3)
 start = (0,0)
 end= (len(frame)-1,len(frame[0])-1)
-stepSize = 60
+stepSize = 200
 
 node_list = [None]
 node_list[0]= Node(start[0],start[1])
@@ -82,8 +92,8 @@ node_list[0].path_y.append(start[1])
 sampling_image = np.full((len(frame),len(frame[0])),255.0,dtype=np.uint8)
 # sampling_image = cv2.cvtColor(sampling_image,cv2.COLOR_GRAY2BGR)
 
-cv2.circle(sampling_image,(start[1]+10,start[0]+10),10,(0,255,0),4)
-cv2.circle(sampling_image,(end[1]-10,end[0]-10),10,(0,0,255),4)
+cv2.circle(frame,(start[1]+10,start[0]+10),10,(0,255,0),4)
+cv2.circle(frame,(end[1]-10,end[0]-10),10,(0,0,255),4)
 gray_img = cv2.cvtColor(frame,cv2.COLOR_BGR2GRAY)
 arucoDict = cv2.aruco.getPredefinedDictionary(aruco.DICT_4X4_100)
 arucoParams = cv2.aruco.DetectorParameters()
@@ -126,9 +136,10 @@ while pathFound==False:
     # initialization of some random node 
     nx,ny = rnd_pnt()
     print("Random Points:",nx,ny) 
-    cv2.circle(sampling_image,(nx,ny),3,0,lineType=8,thickness=2)
+    # cv2.circle(frame,(nx,ny),3,0,lineType=8,thickness=2)
 
     cv2.imshow("test",sampling_image)
+    # cv2.imshow("actual",frame)
     cv2.waitKey(0)
     
  
@@ -151,14 +162,14 @@ while pathFound==False:
         node_list[i].path_y.append(ty)
 
         # drawring the tree 
-        cv2.circle(sampling_image,(int(tx),int(ty)),3,(255,0,0),lineType=8,thickness=3)
-        cv2.line(sampling_image, (int(tx),int(ty)), (int(node_list[nearest_ind].x),int(node_list[nearest_ind].y)), (0,255,0), thickness=1, lineType=8)
+        cv2.circle(frame,(int(tx),int(ty)),3,(0),lineType=8,thickness=3)
+        cv2.line(frame, (int(tx),int(ty)), (int(node_list[nearest_ind].x),int(node_list[nearest_ind].y)), (255,0,0), thickness=1, lineType=8)
        
-        cv2.line(sampling_image,(int(tx),int(ty)),(end[1],end[0]),(0,0,255),thickness=2) 
+        cv2.line(frame,(int(tx),int(ty)),(end[1],end[0]),(255,0,0),thickness=2) 
 
         for j in range(len(node_list[i].path_x)-1):
-            cv2.line(sampling_image, (int(node_list[i].path_x[j]),int(node_list[i].path_y[j])), (int(node_list[i].path_x[j+1]),int(node_list[i].path_y[j+1])), ( 255,0,0), thickness=2, lineType=8)
-        cv2.imshow("LOL",sampling_image)
+            cv2.line(frame, (int(node_list[i].path_x[j]),int(node_list[i].path_y[j])), (int(node_list[i].path_x[j+1]),int(node_list[i].path_y[j+1])), (255,0,0), thickness=2)
+        # cv2.imshow("LOL",sampling_image)
         break
 
     elif nodeCon:
@@ -167,15 +178,15 @@ while pathFound==False:
         node_list[i] = Node(tx,ty)
         node_list[i].path_x = node_list[nearest_ind].path_x.copy()
         node_list[i].path_y = node_list[nearest_ind].path_y.copy()
-        # print(i)cv2.waitKey(1)
+        # print(i)cv2.waitKey(1)        
         # print(node_list[nearest_ind].path_y)
         node_list[i].path_x.append(tx)
         node_list[i].path_y.append(ty)
         i=i+1
         # display
-        cv2.circle(sampling_image, (int(tx),int(ty)), 2,(0,0,255),thickness=3, lineType=8)
-        cv2.line(sampling_image, (int(tx),int(ty)), (int(node_list[nearest_ind].x),int(node_list[nearest_ind].y)), (0,255,0), thickness=1, lineType=8)
-        
+        cv2.circle(sampling_image, (int(tx),int(ty)), 2,0,thickness=3, lineType=8)
+        cv2.line(sampling_image, (int(tx),int(ty)), (int(node_list[nearest_ind].x),int(node_list[nearest_ind].y)), (0,255,0), thickness=2, lineType=8)
+        # cv2.waitKey(0)
         
         
         continue
@@ -187,7 +198,8 @@ while pathFound==False:
 
 
 
-cv2.imshow("sdc",sampling_image)
+# cv2.imshow("sampled",sampling_image)
+cv2.imshow("orignal",frame)
 cv2.waitKey(0)
 
 
