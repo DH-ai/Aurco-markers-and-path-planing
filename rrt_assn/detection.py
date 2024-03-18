@@ -21,19 +21,20 @@ def collision(x1,y1,x2,y2):
         y.append(((y2-y1)/(x2-x1))*(x_cord-x1) + y1)
     for i in range(len(x)):
         color.append(sampling_image[int(y[i]),int(x[i])]) 
-        cv2.circle(sampling_image,(int(x[i]),int(y[i])),3,0,lineType=8,thickness=3)
-        print(int(x[i]),int(y[i]))
-  
-    return True if 0 in color else False
+        cv2.circle(sampling_image,(int(x[i]),int(y[i])),1,(2*i),thickness=3)
+    if 0 in color:
+        return True
+    else: return False
     # if (np.isin()) :
     #     return True
  
 
 def checkCollisons(x1,y1,x2,y2):
     _,theta = dist_and_angle(x1,y1,x2,y2)
+ 
     x = x2+ stepSize*np.cos(theta)
     y = y2+ stepSize*np.sin(theta)
-
+    print(x,y)
     # checking the direct connection between the Q_new and the final end
     if collision(x,y,end[1],end[0]):
         direcCon = False
@@ -60,29 +61,29 @@ def nearest_node(x,y):
 def rnd_pnt():
     new_y = random.randint(0,len(frame))
     new_x = random.randint(0, len(frame[0]))
-    return (new_y,new_x)
+    return (new_x,new_y)
 
 
 def dist_and_angle(x1,y1,x2,y2):
     dist = math.sqrt( ((x1-x2)**2)+((y1-y2)**2) )
-    angle = math.atan2(y2-y1,x2-x1)
+    angle = math.atan2(y1-y2,x1-x2)
     return (dist,angle)
 
 
-frame = cv2.imread("/home/dhruv/Desktop/MRT/rrt/src/rrt_assn/rrt_assn/arucoMarker.jpg") #(1080,1920,3)
+frame = cv2.imread("rrt_assn/arucoMarker.jpg") #(1080,1920,3)
 start = (0,0)
 end= (len(frame)-1,len(frame[0])-1)
 stepSize = 60
-
-cv2.circle(frame,(start[1]+10,start[0]+10),10,(0,255,0),4)
-cv2.circle(frame,(end[1]-10,end[0]-10),10,(0,0,255),4)
 
 node_list = [None]
 node_list[0]= Node(start[0],start[1])
 node_list[0].path_x.append(start[0])
 node_list[0].path_y.append(start[1])
 sampling_image = np.full((len(frame),len(frame[0])),255.0,dtype=np.uint8)
+# sampling_image = cv2.cvtColor(sampling_image,cv2.COLOR_GRAY2BGR)
 
+cv2.circle(sampling_image,(start[1]+10,start[0]+10),10,(0,255,0),4)
+cv2.circle(sampling_image,(end[1]-10,end[0]-10),10,(0,0,255),4)
 gray_img = cv2.cvtColor(frame,cv2.COLOR_BGR2GRAY)
 arucoDict = cv2.aruco.getPredefinedDictionary(aruco.DICT_4X4_100)
 arucoParams = cv2.aruco.DetectorParameters()
@@ -113,10 +114,10 @@ if len(corners)>0:
             [int(bl[0]),int(bl[1])]]
             )
         # for sampled image 
-        cv2.line(sampling_image,topLeft,topRight,0,2)
-        cv2.line(sampling_image,topRight,bottomRight,0,2)
-        cv2.line(sampling_image,bottomRight,bottomLeft,0,2)
-        cv2.line(sampling_image,bottomLeft,topLeft,0,2)
+        # cv2.line(sampling_image,topLeft,topRight,0,2)
+        # cv2.line(sampling_image,topRight,bottomRight,0,2)
+        # cv2.line(sampling_image,bottomRight,bottomLeft,0,2)
+        # cv2.line(sampling_image,bottomLeft,topLeft,0,2)
         cv2.fillPoly(sampling_image, [points], color=(0, 0, 0))
 
 i =1
@@ -125,20 +126,21 @@ while pathFound==False:
     # initialization of some random node 
     nx,ny = rnd_pnt()
     print("Random Points:",nx,ny) 
-    cv2.circle(sampling_image,(nx,ny),3,0,lineType=8,thickness=3)
+    cv2.circle(sampling_image,(nx,ny),3,0,lineType=8,thickness=2)
 
     cv2.imshow("test",sampling_image)
     cv2.waitKey(0)
+    
  
     # getting the nearest node to that
     nearest_ind = nearest_node(nx,ny)
     nearest_x = node_list[nearest_ind].x
     nearest_y = node_list[nearest_ind].y
-    print("Nearest node coordinates:",nearest_x,nearest_y,"Index:",nearest_ind)
+    print("Nearest node coordinates:","(",nearest_x,",",nearest_y,")","Index:",nearest_ind)
 
     # checking the connection 
     tx,ty,directCon,nodeCon = checkCollisons(nx,ny,nearest_x,nearest_y)
-    print(directCon,nodeCon)
+    print("random node position:",tx,ty,directCon,nodeCon)
     if directCon and nodeCon:
         
         node_list.append(i)
@@ -155,7 +157,7 @@ while pathFound==False:
         cv2.line(sampling_image,(int(tx),int(ty)),(end[1],end[0]),(0,0,255),thickness=2) 
 
         for j in range(len(node_list[i].path_x)-1):
-            cv2.line(sampling_image, (int(node_list[i].path_x[j]),int(node_list[i].path_y[j])), (int(node_list[i].path_x[j+1]),int(node_list[i].path_y[j+1])), (255,0,0), thickness=2, lineType=8)
+            cv2.line(sampling_image, (int(node_list[i].path_x[j]),int(node_list[i].path_y[j])), (int(node_list[i].path_x[j+1]),int(node_list[i].path_y[j+1])), ( 255,0,0), thickness=2, lineType=8)
         cv2.imshow("LOL",sampling_image)
         break
 
