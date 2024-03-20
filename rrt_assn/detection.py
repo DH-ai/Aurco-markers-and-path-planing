@@ -80,7 +80,7 @@ def dist_and_angle(x1,y1,x2,y2):
     return (dist,angle)
 
 
-frame = cv2.imread("rrt_assn/arucoMarker.jpg") #(1080,1920,3)
+frame = cv2.imread("src/rrt_assn/rrt_assn/arucoMarker.jpg") #(1080,1920,3)
 start = (0,0)
 end= (len(frame)-1,len(frame[0])-1)
 stepSize = 200
@@ -138,9 +138,9 @@ while pathFound==False:
     print("Random Points:",nx,ny) 
     # cv2.circle(frame,(nx,ny),3,0,lineType=8,thickness=2)
 
-    cv2.imshow("test",sampling_image)
-    # cv2.imshow("actual",frame)
-    cv2.waitKey(0)
+    # cv2.imshow("test",sampling_image)
+    # # cv2.imshow("actual",frame)
+    # cv2.waitKey(0)
     
  
     # getting the nearest node to that
@@ -204,7 +204,7 @@ cv2.waitKey(0)
 
 
 
-cv2.imwrite("sampling.jpg",sampling_image)
+# cv2.imwrite("sampling.jpg",sampling_image)
 cv2.imwrite("frame.jpg",frame)
 
 
